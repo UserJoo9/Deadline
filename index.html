@@ -137,23 +137,32 @@
         }
         .btn-cancel:hover { background: rgba(255, 0, 85, 0.3); }
 
-        .controls-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .pills-group { display: flex; align-items: center; gap: 0.8rem; }
-        .pill-btn {
-            background: #03080d; border: 1px solid #14281c; color: var(--text-muted);
-            padding: 0.55rem 1.2rem; border-radius: 6px; font-size: 0.88rem; cursor: pointer; user-select: none;
-            transition: all 0.2s; font-family: var(--terminal-font);
-        }
-        .pill-btn:hover { border-color: var(--neon-green); color: #fff; }
-        .pill-btn.active {
-            background: var(--green-dim); border-color: var(--neon-green); color: var(--neon-green);
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.25); font-weight: 700;
-        }
+        .controls-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.8rem; }
 
+        /* Path field + index controls: its own row so it always keeps real
+           width instead of being squeezed to nothing next to the mode
+           pills - that squeeze is what made the path unreadable at
+           anything less than a very wide window. */
+        .path-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.9rem; }
         .dir-tag {
+            display: flex; align-items: center; gap: 0.6rem;
             font-family: var(--terminal-font); font-size: 0.85rem; color: var(--text-muted);
-            background: #020508; padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid #14281c;
+            background: #020508; padding: 0.55rem 0.9rem; border-radius: 6px; border: 1px solid #14281c;
+            flex: 1 1 260px; min-width: 0;
         }
+        .dir-tag span { white-space: nowrap; }
+        .dir-tag input {
+            background: transparent; border: none; outline: none; width: 100%; min-width: 0;
+            color: var(--neon-green); font-family: var(--terminal-font); font-size: 0.85rem;
+        }
+        .btn-index { flex: 0 0 auto; }
+
+        .index-status-row { display: flex; align-items: center; gap: 0.55rem; margin-top: 0.7rem; }
+        .index-status-dot {
+            width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); flex: 0 0 auto;
+        }
+        .index-status-dot.ready { background: var(--neon-green); box-shadow: 0 0 8px var(--neon-green); }
+        .index-status-text { font-family: var(--terminal-font); font-size: 0.82rem; color: var(--text-muted); }
 
         .progress-container {
             background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px;
@@ -171,7 +180,7 @@
             border-radius: 4px; transition: width 0.2s ease;
         }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 1.5rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
         .stat-box {
             background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px;
             padding: 1.2rem 1.5rem; position: relative; overflow: hidden;
@@ -256,12 +265,57 @@
             display: flex; align-items: center; gap: 0.5rem; font-family: var(--terminal-font);
         }
         .toast-notify.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Mode is a single choice (OR vs AND), so it's one connected
+           segmented control - only one side can ever be lit. Regex is an
+           independent on/off modifier layered on top of whichever mode is
+           active, so it's a separate switch-styled toggle, not a third pill
+           in the same row - the shapes alone now tell you which kind of
+           control each one is. */
+        .mode-switch {
+            display: inline-flex; background: #03080d; border: 1px solid #14281c;
+            border-radius: 8px; padding: 3px; gap: 2px;
+        }
+        .mode-switch button {
+            border: none; background: transparent; color: var(--text-muted);
+            padding: 0.55rem 1.1rem; border-radius: 6px; font-size: 0.86rem;
+            font-family: var(--terminal-font); cursor: pointer; transition: all 0.2s;
+        }
+        .mode-switch button:hover:not(.active) { color: #fff; }
+        .mode-switch button.active {
+            background: var(--green-dim); color: var(--neon-green); font-weight: 700;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+        }
+
+        .toggle-btn {
+            display: inline-flex; align-items: center; gap: 0.65rem;
+            background: #03080d; border: 1px solid #14281c; color: var(--text-muted);
+            padding: 0.5rem 1.1rem 0.5rem 0.9rem; border-radius: 8px; font-size: 0.86rem; cursor: pointer;
+            font-family: var(--terminal-font); transition: all 0.2s; user-select: none;
+        }
+        .toggle-btn:hover { color: #fff; border-color: #24402f; }
+        .toggle-indicator {
+            width: 28px; height: 16px; border-radius: 999px; background: #0d1a14;
+            border: 1px solid #1c3626; position: relative; flex: 0 0 auto; transition: all 0.2s;
+        }
+        .toggle-indicator::after {
+            content: ''; position: absolute; top: 1px; left: 1px; width: 12px; height: 12px;
+            border-radius: 50%; background: var(--text-muted); transition: all 0.2s;
+        }
+        .toggle-btn.active { color: var(--cyan-accent); border-color: rgba(0, 240, 255, 0.35); }
+        .toggle-btn.active .toggle-indicator { background: rgba(0, 240, 255, 0.15); border-color: var(--cyan-accent); }
+        .toggle-btn.active .toggle-indicator::after {
+            background: var(--cyan-accent); box-shadow: 0 0 6px var(--cyan-accent); transform: translateX(12px);
+        }
+        html[dir="rtl"] .toggle-indicator::after { left: auto; right: 1px; }
+        html[dir="rtl"] .toggle-btn.active .toggle-indicator::after { transform: translateX(-12px); }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="brand-title">
+                <div class="brand-logo" aria-hidden="true">&gt;_</div>
                 <div>
                     <h1>DEADLINE</h1>
                     <p id="txtSubtitle">محرك البحث فائق السرعة واستخراج السجلات</p>
@@ -286,29 +340,33 @@
             </div>
 
             <div class="controls-row">
-                <div class="pills-group">
-                    <button id="pillOr" class="pill-btn active" onclick="selectMode('OR')">
+                <div class="mode-switch">
+                    <button id="pillOr" class="active" onclick="selectMode('OR')">
                         <span id="txtPillOr">مطابقة أي قيمة (OR)</span>
                     </button>
-                    <button id="pillAnd" class="pill-btn" onclick="selectMode('AND')">
+                    <button id="pillAnd" onclick="selectMode('AND')">
                         <span id="txtPillAnd">جميع الكلمات معاً (AND)</span>
                     </button>
-                    <button id="pillRegex" class="pill-btn" onclick="toggleRegexMode()">
-                        <span id="txtPillRegex">نمط متقدم (Regex)</span>
-                    </button>
                 </div>
-                <div class="dir-tag" style="display: flex; align-items: center; gap: 0.5rem; flex: 1; max-width: 460px;">
-                    <span id="txtDirPrefix" style="white-space: nowrap;">المسار:</span>
-                    <input type="text" id="folderInput" style="
-                        background: transparent;
-                        border: none;
-                        outline: none;
-                        color: var(--neon-green);
-                        font-family: var(--terminal-font);
-                        font-size: 0.85rem;
-                        width: 100%;
-                    " placeholder="D:\Cyber Tools\DataBreaches أو اسم مجلد فرعي...">
+                <button id="pillRegex" class="toggle-btn" onclick="toggleRegexMode()">
+                    <span class="toggle-indicator" aria-hidden="true"></span>
+                    <span id="txtPillRegex">نمط متقدم (Regex)</span>
+                </button>
+            </div>
+
+            <div class="path-row">
+                <div class="dir-tag">
+                    <span id="txtDirPrefix">المسار:</span>
+                    <input type="text" id="folderInput" placeholder="D:\Cyber Tools\DataBreaches أو اسم مجلد فرعي...">
                 </div>
+                <button id="btnBuildIndex" class="btn-export btn-index" onclick="buildIndex()">
+                    ⚡ <span id="txtBtnBuildIndex">بناء الفهرس (Index)</span>
+                </button>
+            </div>
+
+            <div class="index-status-row">
+                <span id="indexStatusDot" class="index-status-dot"></span>
+                <span id="indexStatusText" class="index-status-text"></span>
             </div>
         </div>
 
@@ -417,7 +475,13 @@
                 noExport: "لا توجد نتائج لتصديرها.",
                 enterQuery: "يرجى كتابة كلمة أو رقم للبحث عنه أولاً.",
                 scanningProgress: "فحص ملف ({scanned} من {total})...",
-                completed: "اكتملت العملية بنجاح."
+                completed: "اكتملت العملية بنجاح.",
+                indexNone: "لا يوجد فهرس لهذا المسار - البحث سيعمل بالفحص الكامل (أبطأ)",
+                indexReady: "مفهرس: {n} ملف - البحث هيستخدم الفهرس (أسرع)",
+                btnBuildIndex: "بناء الفهرس (Index)",
+                btnRebuildIndex: "تحديث الفهرس",
+                indexBuilding: "جاري الفهرسة... ({done} من {total})",
+                indexBuildDone: "تم بناء الفهرس بنجاح: {n} ملف"
             },
             en: {
                 subtitle: "High-Performance Multi-Core Parallel Search Engine",
@@ -449,7 +513,13 @@
                 noExport: "No results to export.",
                 enterQuery: "Please enter a search query first.",
                 scanningProgress: "Scanning ({scanned} of {total})...",
-                completed: "Search completed successfully."
+                completed: "Search completed successfully.",
+                indexNone: "No index for this path yet - search will do a full scan (slower)",
+                indexReady: "Indexed: {n} files - search will use the index (faster)",
+                btnBuildIndex: "Build Index",
+                btnRebuildIndex: "Refresh Index",
+                indexBuilding: "Indexing... ({done} of {total})",
+                indexBuildDone: "Index built successfully: {n} files"
             }
         };
 
@@ -489,6 +559,7 @@
             document.getElementById('thCopy').innerText = t.thCopy;
             document.getElementById('txtEmptyTitle').innerText = t.emptyTitle;
             document.getElementById('txtEmptyDesc').innerText = t.emptyDesc;
+            refreshIndexStatus();
         }
 
         // Apply initial saved language
@@ -508,6 +579,7 @@
                 if (finp && !finp.value) {
                     finp.value = info.root_dir;
                 }
+                refreshIndexStatus();
             });
 
         // Save folder whenever user changes it
@@ -517,18 +589,100 @@
             });
             finp.addEventListener('change', function() {
                 localStorage.setItem('deadline_folder', finp.value.trim());
+                refreshIndexStatus();
             });
+        }
+
+        function refreshIndexStatus() {
+            var t = i18n[currentLang];
+            var folderVal = document.getElementById('folderInput').value.trim();
+            fetch('/api/index/status?folder=' + encodeURIComponent(folderVal))
+                .then(function(res) { return res.json(); })
+                .then(function(st) {
+                    var el = document.getElementById('indexStatusText');
+                    var dot = document.getElementById('indexStatusDot');
+                    var btnTxt = document.getElementById('txtBtnBuildIndex');
+                    if (!el || !btnTxt) return;
+                    if (st.exists) {
+                        el.innerText = t.indexReady.replace('{n}', st.indexed_files.toLocaleString());
+                        btnTxt.innerText = t.btnRebuildIndex;
+                        if (dot) dot.className = 'index-status-dot ready';
+                    } else {
+                        el.innerText = t.indexNone;
+                        btnTxt.innerText = t.btnBuildIndex;
+                        if (dot) dot.className = 'index-status-dot';
+                    }
+                })
+                .catch(function() {});
+        }
+
+        var indexAbortController = null;
+
+        async function buildIndex() {
+            var t = i18n[currentLang];
+            if (indexAbortController) {
+                indexAbortController.abort();
+            }
+            indexAbortController = new AbortController();
+
+            var folderVal = document.getElementById('folderInput').value.trim();
+            var statusEl = document.getElementById('indexStatusText');
+            var btn = document.getElementById('btnBuildIndex');
+            btn.disabled = true;
+
+            try {
+                var url = '/api/index/build?folder=' + encodeURIComponent(folderVal);
+                var response = await fetch(url, { signal: indexAbortController.signal });
+                var reader = response.body.getReader();
+                var decoder = new TextDecoder();
+                var buffer = '';
+
+                while (true) {
+                    var chunk = await reader.read();
+                    if (chunk.done) break;
+
+                    buffer += decoder.decode(chunk.value, { stream: true });
+                    var lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (var i = 0; i < lines.length; i++) {
+                        var line = lines[i].trim();
+                        if (!line) continue;
+                        try {
+                            var data = JSON.parse(line);
+                            if (data.type === 'index_init') {
+                                statusEl.innerText = t.indexBuilding.replace('{done}', '0').replace('{total}', data.total_files);
+                            } else if (data.type === 'index_progress') {
+                                statusEl.innerText = t.indexBuilding.replace('{done}', data.done_files).replace('{total}', data.total_files);
+                            } else if (data.type === 'index_complete') {
+                                statusEl.innerText = t.indexBuildDone.replace('{n}', data.indexed_files.toLocaleString());
+                            } else if (data.type === 'error') {
+                                statusEl.innerText = data.message;
+                            }
+                        } catch (e) {
+                            console.error('Parse error:', e, line);
+                        }
+                    }
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Index build error:', err);
+                }
+            } finally {
+                btn.disabled = false;
+                refreshIndexStatus();
+            }
         }
 
         function selectMode(m) {
             currentMode = m;
-            document.getElementById('pillOr').className = 'pill-btn' + (m === 'OR' ? ' active' : '');
-            document.getElementById('pillAnd').className = 'pill-btn' + (m === 'AND' ? ' active' : '');
+            document.getElementById('pillOr').className = (m === 'OR' ? 'active' : '');
+            document.getElementById('pillAnd').className = (m === 'AND' ? 'active' : '');
         }
 
         function toggleRegexMode() {
             isRegexActive = !isRegexActive;
-            document.getElementById('pillRegex').className = 'pill-btn' + (isRegexActive ? ' active' : '');
+            document.getElementById('pillRegex').className = 'toggle-btn' + (isRegexActive ? ' active' : '');
         }
 
         document.getElementById('queryInput').addEventListener('keydown', function(e) {
